@@ -41,7 +41,7 @@ defines the image naming, tagging, access, and lifecycle rules inside it.
 
 ### One registry
 
-- **Registry:** `acrplatformsharedcc01`, in `rg-platform-acr-shared-cc-01`, in the
+- **Registry:** `acrplatformsharedcc`, in `rg-platform-acr-shared-cc`, in the
   platform subscription (see [Subscriptions](subscriptions.md)).
 - **SKU: Premium.** Required for production use: private link support (the registry gets
   a private endpoint per [Networking](networking.md)), higher storage and throughput
@@ -78,7 +78,7 @@ Repositories inside the registry are namespaced by workload and component:
   pulls; it never appears in a Terraform configuration, Container App spec, or deploy
   workflow, because it makes "what is running?" unanswerable and rollbacks a guess.
 - **Prod deploys pin the digest.** The deploy manifest references
-  `acrplatformsharedcc01.azurecr.io/billing/billing-api@sha256:…` — the tag got the
+  `acrplatformsharedcc.azurecr.io/billing/billing-api@sha256:…` — the tag got the
   digest *found*; the digest is what gets *deployed*. Promotion dev → stg → prod carries
   the digest forward unchanged (see [Environments](environments.md)).
 
@@ -88,8 +88,8 @@ All grants are Azure RBAC on the registry, per [Identity](identity.md):
 
 | Principal | Role | Purpose |
 |-----------|------|---------|
-| CI deployment identities (`mi-github-billing-prod-cc-01` pattern), via OIDC | `AcrPush` | Build-and-push from GitHub Actions. Push rights only for the pipelines that build images — see [GitHub Actions](../github/github-actions.md). |
-| Workload managed identities (`mi-billing-prod-cc-01` pattern) | `AcrPull` | Runtime image pulls by Container Apps / App Service. Pull only — a workload never pushes. |
+| CI deployment identities (`mi-github-billing-prod-cc` pattern), via OIDC | `AcrPush` | Build-and-push from GitHub Actions. Push rights only for the pipelines that build images — see [GitHub Actions](../github/github-actions.md). |
+| Workload managed identities (`mi-billing-prod-cc` pattern) | `AcrPull` | Runtime image pulls by Container Apps / App Service. Pull only — a workload never pushes. |
 | Platform team group | `AcrPush` + registry management via PIM | Operations, emergency retags, retention configuration. |
 | Developer groups | `AcrPull` | Local pulls of shared images. |
 
@@ -124,13 +124,13 @@ CI push (from `deploy.yml`, authenticated via OIDC — see
 [GitHub Actions](../github/github-actions.md)):
 
 ```bash
-az acr login --name acrplatformsharedcc01
-docker build -t acrplatformsharedcc01.azurecr.io/billing/billing-api:1.4.2 .
-docker push acrplatformsharedcc01.azurecr.io/billing/billing-api:1.4.2
+az acr login --name acrplatformsharedcc
+docker build -t acrplatformsharedcc.azurecr.io/billing/billing-api:1.4.2 .
+docker push acrplatformsharedcc.azurecr.io/billing/billing-api:1.4.2
 
 # capture the digest for the deploy manifest
 az acr repository show \
-  --name acrplatformsharedcc01 \
+  --name acrplatformsharedcc \
   --image billing/billing-api:1.4.2 \
   --query digest -o tsv
 ```
@@ -139,7 +139,7 @@ Prod deploy pins the digest; the environment never influences the artifact:
 
 ```hcl
 # infra/environments/prod/terraform.tfvars
-billing_api_image = "acrplatformsharedcc01.azurecr.io/billing/billing-api@sha256:9f8e7d6c..."
+billing_api_image = "acrplatformsharedcc.azurecr.io/billing/billing-api@sha256:9f8e7d6c..."
 ```
 
 Workload pull identity wiring:
@@ -148,7 +148,7 @@ Workload pull identity wiring:
 resource "azurerm_role_assignment" "acr_pull" {
   scope                = data.azurerm_container_registry.platform.id
   role_definition_name = "AcrPull"
-  principal_id         = azurerm_user_assigned_identity.billing.principal_id  # mi-billing-prod-cc-01
+  principal_id         = azurerm_user_assigned_identity.billing.principal_id  # mi-billing-prod-cc
 }
 ```
 

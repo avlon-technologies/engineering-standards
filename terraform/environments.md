@@ -80,7 +80,7 @@ min_replicas = 2
 max_replicas = 10
 ```
 
-Same variables, same modules, same shape — different scale. The `environment` value also drives resource naming (`rg-billing-prod-cc-01` vs `rg-billing-dev-cc-01`) via the derivation pattern in [Azure Naming](../naming/azure.md).
+Same variables, same modules, same shape — different scale. The `environment` value also drives resource naming (`rg-billing-prod-cc` vs `rg-billing-dev-cc`) via the derivation pattern in [Azure Naming](../naming/azure.md).
 
 ## Anti-patterns
 

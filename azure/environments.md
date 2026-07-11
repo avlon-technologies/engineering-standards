@@ -80,8 +80,8 @@ platform supports them. If it isn't in Terraform, it doesn't exist in prod.
 
 **`shared` — platform only.** `shared` is not a fourth workload environment. It marks
 platform resources that, by their nature, serve every environment at once: the Terraform
-state storage account `sttfstatesharedcc01`, the container registry
-`acrplatformsharedcc01`, hub networking. A workload resource tagged or named `shared` is
+state storage account `sttfstatesharedcc`, the container registry
+`acrplatformsharedcc`, hub networking. A workload resource tagged or named `shared` is
 a standards violation — workloads always live in exactly one of `dev`, `stg`, `prod`.
 
 ### Promotion flow
@@ -120,10 +120,10 @@ convince nobody.
 The `billing` workload across the environment set:
 
 ```text
-rg-billing-dev-cc-01        # dev:  smallest SKUs, public SQL endpoint + firewall rule
-rg-billing-stg-cc-01        # stg:  prod topology, private endpoints, prod SKU family
-rg-billing-prod-cc-01       # prod: locked down, PIM-gated human access
-rg-billing-prod-ce-01       # prod DR pair in Canada East — prod is the only env with DR
+rg-billing-dev-cc        # dev:  smallest SKUs, public SQL endpoint + firewall rule
+rg-billing-stg-cc        # stg:  prod topology, private endpoints, prod SKU family
+rg-billing-prod-cc       # prod: locked down, PIM-gated human access
+rg-billing-prod-ce       # prod DR pair in Canada East — prod is the only env with DR
 ```
 
 Per-environment configuration expressed as data, not code:

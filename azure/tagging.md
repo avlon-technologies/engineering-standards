@@ -82,13 +82,13 @@ locals {
 }
 
 resource "azurerm_resource_group" "main" {
-  name     = "rg-${var.workload}-${var.environment}-${local.region}-01"
+  name     = "rg-${var.workload}-${var.environment}-${local.region}"
   location = var.location
   tags     = local.tags
 }
 
 resource "azurerm_key_vault" "main" {
-  name                = "kv-${var.workload}-${var.environment}-${local.region}-01"
+  name                = "kv-${var.workload}-${var.environment}-${local.region}"
   resource_group_name = azurerm_resource_group.main.name
   location            = var.location
   tags                = local.tags
@@ -126,7 +126,7 @@ the resource and generate perpetual plan noise.
 Tags on the canonical billing production RG:
 
 ```text
-rg-billing-prod-cc-01
+rg-billing-prod-cc
   workload            = billing
   environment         = prod
   owner               = billing-team

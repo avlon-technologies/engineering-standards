@@ -27,12 +27,12 @@ No passwords, keys, tokens, or connection strings in `.tf` files, tfvars, pipeli
 
 Pipelines authenticate to Azure via **OIDC / Workload Identity Federation** — GitHub Actions presents a short-lived, cryptographically verifiable token about *which repo, on which environment* is running, and Entra ID exchanges it for Azure credentials. No client secret exists, so none can expire, leak, or be exfiltrated. (Workflow mechanics in [GitHub Actions](../github/github-actions.md).)
 
-**One deployment identity per workload per environment** — a user-assigned managed identity following the `mi-github-<workload>-<env>-<region>-<instance>` pattern:
+**One deployment identity per workload per environment** — a user-assigned managed identity following the `mi-github-<workload>-<env>-<region>` pattern:
 
 ```text
-mi-github-billing-dev-cc-01
-mi-github-billing-prod-cc-01
-mi-github-code-review-dev-cc-01
+mi-github-billing-dev-cc
+mi-github-billing-prod-cc
+mi-github-code-review-dev-cc
 ```
 
 Each carries a **federated credential** whose subject claim binds it to exactly one repo + GitHub environment:
@@ -48,14 +48,14 @@ resource "azurerm_federated_identity_credential" "github_prod" {
 }
 ```
 
-The subject claim is the security boundary: only a job in `avlon-technologies/billing` running against the `prod` GitHub environment — which means it passed that environment's protection rules and required reviewers ([GitHub Actions](../github/github-actions.md)) — can become `mi-github-billing-prod-cc-01`. A fork, another repo, or a dev job gets nothing. Per-workload-per-environment identities keep the failure mode bounded: compromising the billing dev pipeline yields exactly billing-dev privileges.
+The subject claim is the security boundary: only a job in `avlon-technologies/billing` running against the `prod` GitHub environment — which means it passed that environment's protection rules and required reviewers ([GitHub Actions](../github/github-actions.md)) — can become `mi-github-billing-prod-cc`. A fork, another repo, or a dev job gets nothing. Per-workload-per-environment identities keep the failure mode bounded: compromising the billing dev pipeline yields exactly billing-dev privileges.
 
 ### Least-privilege RBAC for deployment identities
 
 Each deployment identity receives (assigned via groups where practical — see [Identity](../azure/identity.md)):
 
-- **`Contributor` scoped to the workload's resource group(s)** for its environment — `rg-billing-prod-cc-01`, not the subscription. RG-scoped Contributor can build the workload but cannot see or touch neighbors.
-- **Specific data-plane roles** the deploy actually needs: `Storage Blob Data Contributor` on its state container ([Remote State](remote-state.md)), `Key Vault Secrets Officer` on the workload's vault if Terraform manages secrets there, `AcrPush` on `acrplatformsharedcc01` for the CI identity that publishes images ([Container Registry](../azure/container-registry.md)).
+- **`Contributor` scoped to the workload's resource group(s)** for its environment — `rg-billing-prod-cc`, not the subscription. RG-scoped Contributor can build the workload but cannot see or touch neighbors.
+- **Specific data-plane roles** the deploy actually needs: `Storage Blob Data Contributor` on its state container ([Remote State](remote-state.md)), `Key Vault Secrets Officer` on the workload's vault if Terraform manages secrets there, `AcrPush` on `acrplatformsharedcc` for the CI identity that publishes images ([Container Registry](../azure/container-registry.md)).
 - **`Role Based Access Control Administrator` with a condition** limiting assignable roles, *only if* the stack manages RBAC assignments — never blanket `Owner` or `User Access Administrator`.
 
 Never subscription `Owner`, never tenant-level anything. When a stack needs one privilege beyond its RG (a DNS record in the platform zone, a peering), grant that narrow permission at that narrow scope rather than widening the identity.
@@ -70,7 +70,7 @@ State files contain secrets in **plaintext**: generated passwords, connection st
 
 ### Secrets flow: Key Vault, one direction
 
-Secrets originate in **Key Vault** (`kv-billing-prod-cc-01`) and flow toward consumers — never through tfvars, variables, or pipeline configuration:
+Secrets originate in **Key Vault** (`kv-billing-prod-cc`) and flow toward consumers — never through tfvars, variables, or pipeline configuration:
 
 - **Best: app-side references.** The application reads Key Vault at runtime via its managed identity (Key Vault references in App Service / Container Apps). Terraform wires up identity and access, and never touches the secret value at all — it appears in neither plan nor state.
 - **Acceptable: data source at deploy time**, when a resource argument genuinely requires the value:
@@ -109,7 +109,7 @@ The federated credential above, plus the RBAC grant that pairs with it:
 
 ```hcl
 resource "azurerm_role_assignment" "billing_prod_rg" {
-  scope                = azurerm_resource_group.billing_prod.id   # rg-billing-prod-cc-01
+  scope                = azurerm_resource_group.billing_prod.id   # rg-billing-prod-cc
   role_definition_name = "Contributor"
   principal_id         = azurerm_user_assigned_identity.github_billing_prod.principal_id
 }

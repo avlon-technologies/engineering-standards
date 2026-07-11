@@ -24,7 +24,7 @@ Modules are where Terraform either pays off or rots. Done well, a module encodes
 - **No `provider` blocks inside modules.** Modules declare version constraints via `required_providers` only; provider configuration belongs exclusively to root modules (see [Providers](providers.md)). A module with an embedded provider block cannot be called twice, cannot use aliased providers, and hijacks configuration that belongs to the caller.
 - Every variable is typed, described, and validated where the input is constrained; every output is described. See [Variables](variables.md) and [Outputs](outputs.md).
 - Defaults follow the security principle above: omitting an optional variable must never produce a less secure resource than the Avlon baseline (private endpoints in stg/prod, `min_tls_version = "TLS1_2"`, public network access disabled — see [Networking](../azure/networking.md)).
-- Resource names inside modules are **derived, never hardcoded**, from `workload`, `environment`, `location`, and `instance` inputs, per [Azure Naming](../naming/azure.md).
+- Resource names inside modules are **derived, never hardcoded**, from `workload`, `environment`, `location`, and (only when needed) `instance` inputs, per [Azure Naming](../naming/azure.md).
 
 ### Local modules vs. shared modules
 

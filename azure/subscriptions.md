@@ -96,13 +96,13 @@ the flat model demonstrably fails — a hierarchy of one-child nodes is pure cer
 `sub-avlon-platform` contains only capabilities that serve all environments and are owned
 by the platform team:
 
-- **Terraform state**: `rg-platform-tfstate-shared-cc-01` with the state storage account
-  `sttfstatesharedcc01` — see [Remote State](../terraform/remote-state.md).
-- **Container registry**: `rg-platform-acr-shared-cc-01` with `acrplatformsharedcc01` —
+- **Terraform state**: `rg-platform-tfstate-shared-cc` with the state storage account
+  `sttfstatesharedcc` — see [Remote State](../terraform/remote-state.md).
+- **Container registry**: `rg-platform-acr-shared-cc` with `acrplatformsharedcc` —
   see [Container Registry](container-registry.md).
-- **Hub networking**: `rg-platform-network-prod-cc-01` with the hub VNet, private DNS
+- **Hub networking**: `rg-platform-network-prod-cc` with the hub VNet, private DNS
   zones, and shared egress — see [Networking](networking.md).
-- **Central monitoring**: `rg-platform-monitor-prod-cc-01` with the central Log Analytics
+- **Central monitoring**: `rg-platform-monitor-prod-cc` with the central Log Analytics
   workspace.
 
 No workload resources, ever. The platform subscription has the tightest access model in
@@ -117,17 +117,17 @@ Target-state layout:
 ```text
 mg: avlon
 ├── sub-avlon-platform
-│   ├── rg-platform-tfstate-shared-cc-01     # sttfstatesharedcc01
-│   ├── rg-platform-acr-shared-cc-01         # acrplatformsharedcc01
-│   ├── rg-platform-network-prod-cc-01       # hub vnet, private DNS
-│   └── rg-platform-monitor-prod-cc-01       # central Log Analytics
+│   ├── rg-platform-tfstate-shared-cc     # sttfstatesharedcc
+│   ├── rg-platform-acr-shared-cc         # acrplatformsharedcc
+│   ├── rg-platform-network-prod-cc       # hub vnet, private DNS
+│   └── rg-platform-monitor-prod-cc       # central Log Analytics
 ├── sub-avlon-dev
-│   ├── rg-code-review-dev-cc-01
-│   └── rg-billing-dev-cc-01
+│   ├── rg-code-review-dev-cc
+│   └── rg-billing-dev-cc
 └── sub-avlon-prod
-    ├── rg-billing-stg-cc-01                 # stg colocated with prod, isolated by RG + RBAC
-    ├── rg-billing-prod-cc-01
-    └── rg-billing-prod-ce-01                # DR pair
+    ├── rg-billing-stg-cc                 # stg colocated with prod, isolated by RG + RBAC
+    ├── rg-billing-prod-cc
+    └── rg-billing-prod-ce                # DR pair
 ```
 
 Single-subscription starting point — same resource groups, one container:
@@ -135,9 +135,9 @@ Single-subscription starting point — same resource groups, one container:
 ```text
 mg: avlon
 └── sub-avlon-platform                        # doubles as the only subscription initially
-    ├── rg-platform-tfstate-shared-cc-01
-    ├── rg-code-review-dev-cc-01
-    └── rg-billing-prod-cc-01
+    ├── rg-platform-tfstate-shared-cc
+    ├── rg-code-review-dev-cc
+    └── rg-billing-prod-cc
 ```
 
 The later split is a resource-group move, not a rename.

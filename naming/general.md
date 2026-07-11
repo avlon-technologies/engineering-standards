@@ -20,7 +20,7 @@ apply these rules; they never contradict them.
 
 ## Guiding Principles
 
-1. **Names are deterministic.** Given the same inputs — workload, environment, region, instance —
+1. **Names are deterministic.** Given the same inputs — workload, environment, region, and (where used) instance —
    every engineer and every pipeline must produce the identical name, with no lookup and no
    judgement call. If a name cannot be derived mechanically, it is wrong. Determinism is what
    lets Terraform predict names, runbooks construct DR resource names from primary ones, and
@@ -69,7 +69,7 @@ These five terms appear throughout the naming standards and mean exactly this:
 | **component** | A part of a multi-part workload, expressed as a suffix on the workload name. | `billing-api`, `billing-web` |
 | **environment** | The deployment tier, always one of the four codes below. | `dev`, `stg`, `prod`, `shared` |
 | **region** | Short code for an Azure region, defined in [Azure Naming](azure.md#region-codes). | `cc`, `ce` |
-| **instance** | Two-digit zero-padded ordinal disambiguating otherwise-identical resources. Always `01` unless a second instance actually exists. | `01`, `02` |
+| **instance** | Two-digit zero-padded ordinal disambiguating otherwise-identical siblings. **Omitted by default** — appended only when multiple instances exist in the same scope, or when a globally unique name is taken. See [Azure Naming](azure.md#the-instance-segment). | `02`, `03` |
 
 Use the term **workload**, not "application" or "project". "Application" suggests only
 user-facing software and excludes platform capabilities like `platform-network`; "project"
@@ -98,9 +98,9 @@ platform capability instead.
 
 Workload names are lowercase kebab-case, start with a letter, and are **at most 12 characters**
 including hyphens. The limit is not aesthetic: an Azure storage account name has 24 characters
-total and no hyphens, and the pattern `st<workload><env><region><instance>` spends 2 on the
-prefix, up to 4 on environment, up to 4 on region, and 2 on the instance — leaving roughly 12
-for the workload. One global limit, enforced once in Terraform validation, beats discovering the
+total and no hyphens, and the pattern `st<workload><env><region>` spends 2 on the prefix, up to
+6 on environment (`shared`), and up to 4 on region — leaving roughly 12 for the workload (one
+character less if an instance ordinal ever has to be appended). One global limit, enforced once in Terraform validation, beats discovering the
 problem at `terraform apply` time in the one environment with the longest environment code.
 
 Choose the name once, at workload inception, and treat it as immutable — it will be embedded in
@@ -135,11 +135,11 @@ The same workload name flowing through every system, unchanged:
 ```text
 billing                                  # the workload name, chosen once
 ├── github.com/avlon-technologies/billing             # repository
-├── rg-billing-prod-cc-01                # Azure resource group
-├── stbillingprodcc01                    # storage account (hyphens stripped, name survives)
-├── kv-billing-prod-cc-01                # Key Vault
+├── rg-billing-prod-cc                # Azure resource group
+├── stbillingprodcc                    # storage account (hyphens stripped, name survives)
+├── kv-billing-prod-cc                # Key Vault
 ├── tfstate-prod / billing.tfstate       # Terraform state container + key
-├── mi-github-billing-prod-cc-01         # deployment identity for CI/CD
+├── mi-github-billing-prod-cc         # deployment identity for CI/CD
 └── workload = "billing"                 # tag and Terraform variable value
 ```
 
@@ -148,7 +148,7 @@ And the environment string crossing system boundaries byte-identically:
 ```text
 GitHub environment:        prod
 Terraform variable:        environment = "prod"
-Azure resource name:       app-billing-api-prod-cc-01
+Azure resource name:       app-billing-api-prod-cc
 State container:           tfstate-prod
 Tag:                       environment = prod
 ```

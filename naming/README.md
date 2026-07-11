@@ -29,7 +29,7 @@ kebab-case, deterministic names, the `dev`/`stg`/`prod`/`shared` environment cod
 other three documents apply them to their domain. The dependencies are deliberate: the Azure
 standard constrains **workload names to 12 characters** because of Azure length limits, and that
 constraint flows outward — a GitHub repository named `billing` and a Terraform state key
-`billing.tfstate` use the *same* workload name as the resource group `rg-billing-prod-cc-01`.
+`billing.tfstate` use the *same* workload name as the resource group `rg-billing-prod-cc`.
 Environment strings are shared even more strictly: GitHub environments, Terraform variables, and
 Azure resource names all use the identical `dev`/`stg`/`prod` codes, because CI/CD automation
 keys off string equality between them.

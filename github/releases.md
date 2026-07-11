@@ -148,7 +148,7 @@ The generated notes flag the breaking change; consumers upgrade deliberately:
 # avlon-technologies/billing — infra/environments/prod/main.tf, upgraded in its own reviewed PR
 module "container_app" {
   source = "git::https://github.com/avlon-technologies/terraform-azurerm-container-app.git?ref=v3.0.0"
-  image  = "acrplatformsharedcc01.azurecr.io/billing-api:9f3ab12"   # was: container_image
+  image  = "acrplatformsharedcc.azurecr.io/billing-api:9f3ab12"   # was: container_image
 }
 ```
 

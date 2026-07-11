@@ -7,7 +7,7 @@
 
 ## Purpose
 
-Every Terraform stack at Avlon stores its state in `sttfstatesharedcc01` ([Remote State](remote-state.md)) — which raises the obvious chicken-and-egg problem: the storage account that holds all state cannot store its own state before it exists, and no workload stack should be trusted to create it as a side effect. Without a deliberate answer, teams improvise: a hand-clicked storage account nobody codified, or backend resources buried inside a workload stack where a `terraform destroy` takes the whole organization's state with it. This standard defines the answer: a minimal, dedicated **bootstrap configuration**, run once by a human, whose own state is then migrated into the storage it created.
+Every Terraform stack at Avlon stores its state in `sttfstatesharedcc` ([Remote State](remote-state.md)) — which raises the obvious chicken-and-egg problem: the storage account that holds all state cannot store its own state before it exists, and no workload stack should be trusted to create it as a side effect. Without a deliberate answer, teams improvise: a hand-clicked storage account nobody codified, or backend resources buried inside a workload stack where a `terraform destroy` takes the whole organization's state with it. This standard defines the answer: a minimal, dedicated **bootstrap configuration**, run once by a human, whose own state is then migrated into the storage it created.
 
 ## Guiding Principles
 
@@ -23,8 +23,8 @@ Every Terraform stack at Avlon stores its state in `sttfstatesharedcc01` ([Remot
 
 A minimal root configuration living in the **`platform-tfstate`** repository (platform capability, dedicated repo — see [Repository Layout](repository-layout.md)). It creates, in the `shared` environment:
 
-- `rg-platform-tfstate-shared-cc-01` — the resource group
-- `sttfstatesharedcc01` — the storage account, hardened: shared-key access **disabled**, public blob access **disabled**, TLS 1.2 minimum, blob **versioning** and 30-day **soft delete** enabled
+- `rg-platform-tfstate-shared-cc` — the resource group
+- `sttfstatesharedcc` — the storage account, hardened: shared-key access **disabled**, public blob access **disabled**, TLS 1.2 minimum, blob **versioning** and 30-day **soft delete** enabled
 - The four state containers: `tfstate-dev`, `tfstate-stg`, `tfstate-prod`, `tfstate-shared`
 - RBAC: `Storage Blob Data Contributor` per container for the CI deployment identities, and the platform team's group assignment (see [Identity](../azure/identity.md))
 
@@ -49,8 +49,8 @@ terraform apply
 ```hcl
 terraform {
   backend "azurerm" {
-    resource_group_name  = "rg-platform-tfstate-shared-cc-01"
-    storage_account_name = "sttfstatesharedcc01"
+    resource_group_name  = "rg-platform-tfstate-shared-cc"
+    storage_account_name = "sttfstatesharedcc"
     container_name       = "tfstate-shared"
     key                  = "platform-tfstate.tfstate"
     use_azuread_auth     = true
@@ -77,13 +77,13 @@ The bootstrap `main.tf`, essentially in full:
 
 ```hcl
 resource "azurerm_resource_group" "tfstate" {
-  name     = "rg-platform-tfstate-shared-cc-01"
+  name     = "rg-platform-tfstate-shared-cc"
   location = "canadacentral"
   tags     = local.tags
 }
 
 resource "azurerm_storage_account" "tfstate" {
-  name                = "sttfstatesharedcc01"
+  name                = "sttfstatesharedcc"
   resource_group_name = azurerm_resource_group.tfstate.name
   location            = azurerm_resource_group.tfstate.location
 

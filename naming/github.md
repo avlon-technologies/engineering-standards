@@ -106,7 +106,7 @@ at every layer:
   `["dev", "stg", "prod"]`.
 - The same string appears in the Azure resource names being deployed and selects the state
   container (`tfstate-prod`).
-- The OIDC federated credential for `mi-github-billing-prod-cc-01` is scoped to the repository
+- The OIDC federated credential for `mi-github-billing-prod-cc` is scoped to the repository
   *and environment* — a job in environment `production` would simply fail to authenticate.
 
 A GitHub environment named `staging` next to a Terraform variable expecting `stg` is a broken
@@ -166,7 +166,7 @@ jobs:
     steps:
       - run: terraform apply -var environment=prod   # matches Terraform validation
         working-directory: infra/environments/prod   # matches directory layout
-        # → deploys app-billing-api-prod-cc-01, state key tfstate-prod/billing.tfstate
+        # → deploys app-billing-api-prod-cc, state key tfstate-prod/billing.tfstate
 ```
 
 Four systems, one string.

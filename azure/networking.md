@@ -44,11 +44,11 @@ the cost of privacy exceeds its value.
 
 ### Topology: hub and spokes
 
-- **Hub:** `vnet-platform-prod-cc-01`, in `rg-platform-network-prod-cc-01`, owned by the
+- **Hub:** `vnet-platform-prod-cc`, in `rg-platform-network-prod-cc`, owned by the
   platform team. Hosts the central private DNS zones, shared egress (firewall/NAT as the
   estate requires), and any future hybrid connectivity (VPN/ExpressRoute).
 - **Spokes:** one VNet per workload per environment that needs one, in the workload's RG
-  and Terraform state — e.g. `vnet-billing-prod-cc-01` — peered to the hub. Spokes never
+  and Terraform state — e.g. `vnet-billing-prod-cc` — peered to the hub. Spokes never
   peer with each other; anything that looks like spoke-to-spoke traffic goes through a
   published interface (an API, a private endpoint), not a network path.
 - Address space is allocated centrally by the platform team from a non-overlapping plan,
@@ -69,10 +69,10 @@ change, and an empty VNet is pure carrying cost.
 
 ### Subnets and NSGs
 
-- Subnets are per-tier within a workload spoke: `snet-billing-app-prod-cc-01`,
-  `snet-billing-data-prod-cc-01` (delegated subnets for Container Apps / App Service
+- Subnets are per-tier within a workload spoke: `snet-billing-app-prod-cc`,
+  `snet-billing-data-prod-cc` (delegated subnets for Container Apps / App Service
   integration as the platform requires).
-- **Every subnet gets an NSG** (`nsg-billing-app-prod-cc-01`), including "internal only"
+- **Every subnet gets an NSG** (`nsg-billing-app-prod-cc`), including "internal only"
   subnets — the subnet with no NSG is the one lateral movement will use. Rules allow the
   specific tier-to-tier flows the workload needs and deny the rest.
 - NSGs, like everything else, are Terraform-managed; a portal-added allow rule is drift.
@@ -82,10 +82,10 @@ change, and an empty VNet is pure carrying cost.
 In `stg` and `prod`, the following are reached exclusively via private endpoints, with
 `public_network_access_enabled = false`:
 
-- Azure SQL (`pep-billing-sql-prod-cc-01`)
+- Azure SQL (`pep-billing-sql-prod-cc`)
 - Storage accounts
 - Key Vault
-- The container registry `acrplatformsharedcc01` (see
+- The container registry `acrplatformsharedcc` (see
   [Container Registry](container-registry.md))
 
 The private endpoint lives in the workload's data subnet, in the workload's RG, in the
@@ -97,7 +97,7 @@ resource like the registry.
 The `privatelink.*` zones (`privatelink.database.windows.net`,
 `privatelink.blob.core.windows.net`, `privatelink.vaultcore.azure.net`,
 `privatelink.azurecr.io`, …) are hosted **centrally in the hub**, in
-`rg-platform-network-prod-cc-01`, and linked to every spoke. Workload stacks register
+`rg-platform-network-prod-cc`, and linked to every spoke. Workload stacks register
 their endpoints' records into the central zones; they never create their own copies of
 these zones. Split-brain private DNS — two zones for the same name with different
 records — is the single most common cause of "works from one VNet, times out from
@@ -137,21 +137,21 @@ tfvar in dev only; the code paths are identical.
 The billing production spoke:
 
 ```text
-rg-platform-network-prod-cc-01                # platform-owned hub
-├── vnet-platform-prod-cc-01                  # hub: DNS, egress, future hybrid
+rg-platform-network-prod-cc                # platform-owned hub
+├── vnet-platform-prod-cc                  # hub: DNS, egress, future hybrid
 └── privatelink.database.windows.net          # central private DNS zones (+ blob, vault, acr)
 
-rg-billing-prod-cc-01                         # workload-owned spoke
-├── vnet-billing-prod-cc-01                   # peered to hub
-│   ├── snet-billing-app-prod-cc-01           #   app tier (App Service integration)
-│   │   └── nsg-billing-app-prod-cc-01
-│   └── snet-billing-data-prod-cc-01          #   data tier (private endpoints)
-│       └── nsg-billing-data-prod-cc-01
-├── pep-billing-sql-prod-cc-01                # SQL private endpoint → central DNS record
-└── sql-billing-prod-cc-01                    # public_network_access_enabled = false
+rg-billing-prod-cc                         # workload-owned spoke
+├── vnet-billing-prod-cc                   # peered to hub
+│   ├── snet-billing-app-prod-cc           #   app tier (App Service integration)
+│   │   └── nsg-billing-app-prod-cc
+│   └── snet-billing-data-prod-cc          #   data tier (private endpoints)
+│       └── nsg-billing-data-prod-cc
+├── pep-billing-sql-prod-cc                # SQL private endpoint → central DNS record
+└── sql-billing-prod-cc                    # public_network_access_enabled = false
 ```
 
-The same workload in dev: no VNet at all — `sql-billing-dev-cc-01` with firewall rules,
+The same workload in dev: no VNet at all — `sql-billing-dev-cc` with firewall rules,
 Entra auth, synthetic data, and `private_endpoints = false` in `dev/terraform.tfvars`.
 
 ## Anti-patterns

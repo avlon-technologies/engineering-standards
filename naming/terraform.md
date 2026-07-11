@@ -88,8 +88,8 @@ resource "azurerm_private_endpoint" "sql" { ... }
 
 data "azurerm_client_config" "current" { ... }
 data "azurerm_container_registry" "platform" {
-  name                = "acrplatformsharedcc01"
-  resource_group_name = "rg-platform-acr-shared-cc-01"
+  name                = "acrplatformsharedcc"
+  resource_group_name = "rg-platform-acr-shared-cc"
 }
 ```
 
@@ -108,7 +108,7 @@ values (see [Variables](../terraform/variables.md)). Naming rules:
 - **Units belong in the name.** `retention_days = 30`, `timeout_seconds = 300`,
   `max_size_gb = 250`. A bare `retention = 30` forces every reader to check the provider docs
   to learn whether that is days or hours.
-- **The standard naming inputs are `workload`, `environment`, `location`, `instance`** — the
+- **The standard naming inputs are `workload`, `environment`, `location`, and the optional `instance`** — the
   exact variables the name-generation locals in [Azure Resource Naming](azure.md) consume. Do
   not alias them (`app_name`, `env`) per repo; module reuse depends on the shared vocabulary.
 
@@ -174,11 +174,11 @@ A local used once, immediately, may not deserve to exist; a local used by every 
 
 One state file per deployable workload per environment (see
 [Remote State](../terraform/remote-state.md)). State lives in the platform storage account
-`sttfstatesharedcc01` with **one container per environment** and the blob key
+`sttfstatesharedcc` with **one container per environment** and the blob key
 `<workload>.tfstate`:
 
 ```text
-Storage account: sttfstatesharedcc01        (rg-platform-tfstate-shared-cc-01)
+Storage account: sttfstatesharedcc        (rg-platform-tfstate-shared-cc)
 ├── tfstate-dev/
 │   └── code-review.tfstate
 ├── tfstate-stg/
@@ -196,8 +196,8 @@ boundary: the dev deployment identity can be scoped to `tfstate-dev` alone.
 ```hcl
 terraform {
   backend "azurerm" {
-    resource_group_name  = "rg-platform-tfstate-shared-cc-01"
-    storage_account_name = "sttfstatesharedcc01"
+    resource_group_name  = "rg-platform-tfstate-shared-cc"
+    storage_account_name = "sttfstatesharedcc"
     container_name       = "tfstate-prod"
     key                  = "billing.tfstate"
     use_azuread_auth     = true
@@ -224,8 +224,8 @@ A complete, conventionally named root module for `billing` in prod
 # backend.tf — state key derived from workload + environment container
 terraform {
   backend "azurerm" {
-    resource_group_name  = "rg-platform-tfstate-shared-cc-01"
-    storage_account_name = "sttfstatesharedcc01"
+    resource_group_name  = "rg-platform-tfstate-shared-cc"
+    storage_account_name = "sttfstatesharedcc"
     container_name       = "tfstate-prod"
     key                  = "billing.tfstate"
     use_azuread_auth     = true
@@ -244,7 +244,7 @@ module "database" {
 module "key_vault" {
   source = "git::https://github.com/avlon-technologies/terraform-azurerm-key-vault.git?ref=v2.1.0"
 
-  name                = "kv-${local.suffix}"          # kv-billing-prod-cc-01
+  name                = "kv-${local.suffix}"          # kv-billing-prod-cc
   resource_group_name = azurerm_resource_group.main.name
 }
 

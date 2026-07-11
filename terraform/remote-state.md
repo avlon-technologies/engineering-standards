@@ -21,7 +21,7 @@ State is the most dangerous file Terraform produces. It is the single record of 
 
 ### Where state lives
 
-All state resides in the storage account **`sttfstatesharedcc01`** in resource group **`rg-platform-tfstate-shared-cc-01`**, owned by the platform team. This account is created and maintained by the bootstrap configuration ([Backend Bootstrap](backend-bootstrap.md)) — no workload stack ever manages it.
+All state resides in the storage account **`sttfstatesharedcc`** in resource group **`rg-platform-tfstate-shared-cc`**, owned by the platform team. This account is created and maintained by the bootstrap configuration ([Backend Bootstrap](backend-bootstrap.md)) — no workload stack ever manages it.
 
 Within the account, **one blob container per environment**:
 
@@ -52,8 +52,8 @@ Each environment root's `backend.tf` (see [Repository Layout](repository-layout.
 ```hcl
 terraform {
   backend "azurerm" {
-    resource_group_name  = "rg-platform-tfstate-shared-cc-01"
-    storage_account_name = "sttfstatesharedcc01"
+    resource_group_name  = "rg-platform-tfstate-shared-cc"
+    storage_account_name = "sttfstatesharedcc"
     container_name       = "tfstate-prod"
     key                  = "billing.tfstate"
     use_azuread_auth     = true
@@ -65,7 +65,7 @@ terraform {
 
 ### Durability, history, and locking
 
-The bootstrap configuration enables on `sttfstatesharedcc01`:
+The bootstrap configuration enables on `sttfstatesharedcc`:
 
 - **Blob versioning** — every state write creates a new version. Recovering from a corrupted state or a destructive mistake is "promote the previous version", with full history of who wrote what, when.
 - **Soft delete** (30 days, blobs and containers) — a deleted state blob is recoverable, not gone.
@@ -75,7 +75,7 @@ The bootstrap configuration enables on `sttfstatesharedcc01`:
 
 State contains secrets in plaintext — treat read access to a state container as equivalent to read access to that environment's secrets (see [Security](security.md)):
 
-- **CI deployment identities**: each workload's per-environment identity (e.g. `mi-github-billing-prod-cc-01`) gets `Storage Blob Data Contributor` scoped to its environment's container only. The dev identity cannot see `tfstate-prod`.
+- **CI deployment identities**: each workload's per-environment identity (e.g. `mi-github-billing-prod-cc`) gets `Storage Blob Data Contributor` scoped to its environment's container only. The dev identity cannot see `tfstate-prod`.
 - **Platform team**: data-plane access via Entra ID group, PIM-elevated for prod/shared containers (see [Identity](../azure/identity.md)).
 - **Everyone else**: nothing. Engineers debugging state go through plan output, `terraform state list` under an authorized identity, or the platform team — not ad-hoc blob downloads.
 
@@ -88,8 +88,8 @@ Sometimes a workload needs something another stack created — the hub VNet from
 
 ```hcl
 data "azurerm_virtual_network" "hub" {
-  name                = "vnet-platform-prod-cc-01"
-  resource_group_name = "rg-platform-network-prod-cc-01"
+  name                = "vnet-platform-prod-cc"
+  resource_group_name = "rg-platform-network-prod-cc"
 }
 ```
 
@@ -102,8 +102,8 @@ The `code-review` dev root:
 ```hcl
 terraform {
   backend "azurerm" {
-    resource_group_name  = "rg-platform-tfstate-shared-cc-01"
-    storage_account_name = "sttfstatesharedcc01"
+    resource_group_name  = "rg-platform-tfstate-shared-cc"
+    storage_account_name = "sttfstatesharedcc"
     container_name       = "tfstate-dev"
     key                  = "code-review.tfstate"
     use_azuread_auth     = true
@@ -114,7 +114,7 @@ terraform {
 The full state layout for the canonical workloads:
 
 ```text
-sttfstatesharedcc01/
+sttfstatesharedcc/
 ├── tfstate-dev/       code-review.tfstate, billing.tfstate
 ├── tfstate-stg/       code-review.tfstate, billing.tfstate
 ├── tfstate-prod/      code-review.tfstate, billing.tfstate
@@ -135,7 +135,7 @@ sttfstatesharedcc01/
 
 ## Tradeoffs
 
-- **One account is a shared dependency.** All Terraform operations depend on `sttfstatesharedcc01`; an outage blocks every deploy (running infrastructure is unaffected). We accept this over per-team accounts because a single account gets versioning, RBAC, monitoring, and bootstrap discipline applied once and correctly.
+- **One account is a shared dependency.** All Terraform operations depend on `sttfstatesharedcc`; an outage blocks every deploy (running infrastructure is unaffected). We accept this over per-team accounts because a single account gets versioning, RBAC, monitoring, and bootstrap discipline applied once and correctly.
 - **Many small states mean orchestration seams.** What a monolith did in one apply may take two ordered applies across stacks. Deterministic naming and data sources absorb most of it; the rest is documented apply order — a fair price for bounded blast radii.
 - **Entra ID auth requires identity plumbing before day one.** You can't init until an identity has container RBAC. [Backend Bootstrap](backend-bootstrap.md) and the workload onboarding process exist precisely to make this a solved, one-time problem.
 

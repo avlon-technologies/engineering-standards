@@ -48,7 +48,7 @@ organized by workload**, and everything inside one shares a lifecycle.
 ### One resource group per workload per environment per region
 
 ```text
-rg-<workload>-<environment>-<region>-<instance>
+rg-<workload>-<environment>-<region>
 ```
 
 Every workload gets exactly one RG per environment per region it deploys to. The name
@@ -123,24 +123,24 @@ capabilities:
 
 ```text
 sub-avlon-dev
-├── rg-code-review-dev-cc-01        # Container Apps workload: cae, ca, kv, sql, mi, appi
-└── rg-billing-dev-cc-01            # App Service + SQL workload, dev tier
+├── rg-code-review-dev-cc        # Container Apps workload: cae, ca, kv, sql, mi, appi
+└── rg-billing-dev-cc            # App Service + SQL workload, dev tier
 
 sub-avlon-prod
-├── rg-billing-stg-cc-01            # staging — full prod topology
-├── rg-billing-prod-cc-01           # primary region: app, asp, sql, kv, vnet, pep, st
-└── rg-billing-prod-ce-01           # DR region — independently operable
+├── rg-billing-stg-cc            # staging — full prod topology
+├── rg-billing-prod-cc           # primary region: app, asp, sql, kv, vnet, pep, st
+└── rg-billing-prod-ce           # DR region — independently operable
 
 sub-avlon-platform
-├── rg-platform-network-prod-cc-01  # hub VNet, private DNS zones
-├── rg-platform-tfstate-shared-cc-01# sttfstatesharedcc01
-├── rg-platform-acr-shared-cc-01    # acrplatformsharedcc01
-└── rg-platform-monitor-prod-cc-01  # central Log Analytics
+├── rg-platform-network-prod-cc  # hub VNet, private DNS zones
+├── rg-platform-tfstate-shared-cc# sttfstatesharedcc
+├── rg-platform-acr-shared-cc    # acrplatformsharedcc
+└── rg-platform-monitor-prod-cc  # central Log Analytics
 ```
 
-Note what the layout makes trivial: deleting `rg-code-review-dev-cc-01` retires that
+Note what the layout makes trivial: deleting `rg-code-review-dev-cc` retires that
 environment completely; granting the billing team operate rights in dev is one assignment
-on `rg-billing-dev-cc-01`; the prod cost of billing is one RG cost view (two with DR).
+on `rg-billing-dev-cc`; the prod cost of billing is one RG cost view (two with DR).
 
 ## Anti-patterns
 

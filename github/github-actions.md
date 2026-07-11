@@ -62,7 +62,7 @@ publish profiles, no stored cloud credentials anywhere** — not in repo secrets
 environment secrets, not in org secrets.
 
 One deployment identity exists **per workload per environment** — for `billing` in
-production, `mi-github-billing-prod-cc-01` — with a federated credential scoped to the
+production, `mi-github-billing-prod-cc` — with a federated credential scoped to the
 matching GitHub environment (`repo:avlon-technologies/billing:environment:prod`), so the `prod`
 identity is only obtainable by a job that has passed the `prod` environment's approval
 gate. Identity setup and RBAC scoping are covered in
@@ -104,7 +104,7 @@ comments the plan).
 ### Secrets
 
 Prefer **no secrets at all**: OIDC for cloud auth, and application secrets fetched at
-deploy time from Key Vault (`kv-billing-prod-cc-01`) by the workload's managed identity.
+deploy time from Key Vault (`kv-billing-prod-cc`) by the workload's managed identity.
 When a secret is genuinely unavoidable (a third-party SaaS API key), store it in the
 **GitHub environment** it belongs to — never as a repo-wide secret — so it is only
 exposed to jobs that passed that environment's protection rules.
@@ -175,8 +175,8 @@ jobs:
 ```
 
 The prod stage of `deploy.yml`, authenticating with OIDC as
-`mi-github-billing-prod-cc-01` and pulling the image promoted through
-`acrplatformsharedcc01`:
+`mi-github-billing-prod-cc` and pulling the image promoted through
+`acrplatformsharedcc`:
 
 ```yaml
   deploy-prod:
@@ -194,7 +194,7 @@ The prod stage of `deploy.yml`, authenticating with OIDC as
       - uses: actions/checkout@v4
       - uses: azure/login@v2
         with:
-          client-id: ${{ vars.AZURE_CLIENT_ID }}        # mi-github-billing-prod-cc-01
+          client-id: ${{ vars.AZURE_CLIENT_ID }}        # mi-github-billing-prod-cc
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
       - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
@@ -226,7 +226,7 @@ jobs:
 | `uses: someone/action@v3` (third party) | Tag can be repointed at malicious code that runs with your token and identity |
 | No `permissions:` block | Token defaults are far broader than any job needs; a compromised step inherits it all |
 | Deploying from environment branches | See [Branching](branching.md) — environments are pipeline stages, not branches |
-| Rebuilding the image per environment | stg validated a different artifact than prod runs; promote one image by tag through `acrplatformsharedcc01` (see [Container Registry](../azure/container-registry.md)) |
+| Rebuilding the image per environment | stg validated a different artifact than prod runs; promote one image by tag through `acrplatformsharedcc` (see [Container Registry](../azure/container-registry.md)) |
 | No concurrency group on deploys | Two merges apply Terraform against the same state concurrently |
 | Repo-wide secrets used by deploy jobs | Any workflow in the repo can read them, bypassing environment protection |
 | Calling reusable workflows `@main` | Every consumer takes unreviewed pipeline changes instantly |

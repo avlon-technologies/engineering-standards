@@ -64,7 +64,7 @@ Every workload authenticates to Azure services (Key Vault, SQL, Storage, the con
 registry) with a **managed identity** — no connection strings with embedded keys, no
 service principal credentials.
 
-**User-assigned identities are the default** (`mi-billing-prod-cc-01` pattern, one per
+**User-assigned identities are the default** (`mi-billing-prod-cc` pattern, one per
 workload per environment). System-assigned identities are acceptable for a single
 resource with no shared access needs, but user-assigned is preferred because:
 
@@ -94,7 +94,7 @@ GitHub Actions authenticates to Azure via **Workload Identity Federation (OIDC)*
 pipeline exchanges a GitHub-issued OIDC token for Azure credentials at run time. Nothing
 is stored in GitHub secrets that could authenticate to Azure.
 
-- One deployment identity per workload per environment, `mi-github-billing-prod-cc-01`
+- One deployment identity per workload per environment, `mi-github-billing-prod-cc`
   pattern, with federated credentials bound to the specific repository and GitHub
   environment (`dev`, `stg`, `prod`).
 - Each deployment identity is granted only the roles its stack needs, at the workload RG
@@ -128,7 +128,7 @@ The billing workload's identity plumbing in prod:
 
 ```hcl
 resource "azurerm_user_assigned_identity" "billing" {
-  name                = "mi-billing-prod-cc-01"
+  name                = "mi-billing-prod-cc"
   resource_group_name = azurerm_resource_group.main.name
   location            = var.location
   tags                = local.tags
@@ -136,21 +136,21 @@ resource "azurerm_user_assigned_identity" "billing" {
 
 # Workload identity reads secrets — narrow built-in role, single-resource scope
 resource "azurerm_role_assignment" "kv_secrets" {
-  scope                = azurerm_key_vault.main.id      # kv-billing-prod-cc-01
+  scope                = azurerm_key_vault.main.id      # kv-billing-prod-cc
   role_definition_name = "Key Vault Secrets User"
   principal_id         = azurerm_user_assigned_identity.billing.principal_id
 }
 
 # Workload identity pulls images from the shared registry
 resource "azurerm_role_assignment" "acr_pull" {
-  scope                = data.azurerm_container_registry.platform.id  # acrplatformsharedcc01
+  scope                = data.azurerm_container_registry.platform.id  # acrplatformsharedcc
   role_definition_name = "AcrPull"
   principal_id         = azurerm_user_assigned_identity.billing.principal_id
 }
 
 # Humans: the team group gets read on the RG; write in prod is PIM-eligible only
 resource "azurerm_role_assignment" "team_read" {
-  scope                = azurerm_resource_group.main.id  # rg-billing-prod-cc-01
+  scope                = azurerm_resource_group.main.id  # rg-billing-prod-cc
   role_definition_name = "Reader"
   principal_id         = data.azuread_group.billing_team_prod_readers.object_id
 }
