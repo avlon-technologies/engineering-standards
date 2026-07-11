@@ -1,7 +1,7 @@
 # GitHub Naming
 
 **Status:** Active
-**Applies to:** Everything named inside the `avlon` GitHub organization — repositories, branches, workflow files, GitHub environments, labels, and teams.
+**Applies to:** Everything named inside the `avlon-technologies` GitHub organization — repositories, branches, workflow files, GitHub environments, labels, and teams.
 
 ---
 
@@ -130,11 +130,11 @@ not `area/backend-stuff`.
 
 ### Teams
 
-Teams are named `<team>-team` and referenced as `@avlon/<team>-team`:
+Teams are named `<team>-team` and referenced as `@avlon-technologies/<team>-team`:
 
 ```text
-@avlon/platform-team
-@avlon/billing-team
+@avlon-technologies/platform-team
+@avlon-technologies/billing-team
 ```
 
 The `-team` suffix keeps team mentions unambiguous next to repository and workload names in
@@ -146,15 +146,15 @@ see [Code Reviews](../github/code-reviews.md).
 The `billing` workload, end to end:
 
 ```text
-Repository:          avlon/billing            (infra + app, single lifecycle)
-Module consumed:     avlon/terraform-azurerm-container-app?ref=v1.2.0
+Repository:          avlon-technologies/billing            (infra + app, single lifecycle)
+Module consumed:     avlon-technologies/terraform-azurerm-container-app?ref=v1.2.0
 Branch:              feature/142-invoice-export
 Workflows:           .github/workflows/ci.yml         (name: CI)
                      .github/workflows/deploy.yml     (name: Deploy)
-GitHub environments: dev → stg → prod   (prod: required reviewers @avlon/billing-team)
+GitHub environments: dev → stg → prod   (prod: required reviewers @avlon-technologies/billing-team)
 Labels:              type/feature, priority/p2, area/billing-api
-CODEOWNERS:          * @avlon/billing-team
-                     /infra/ @avlon/platform-team
+CODEOWNERS:          * @avlon-technologies/billing-team
+                     /infra/ @avlon-technologies/platform-team
 ```
 
 And the string-equality chain that makes `deploy.yml` work:

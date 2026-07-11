@@ -120,7 +120,7 @@ tags = {
   owner       = "billing-team"
   cost-center = "cc-1204"
   managed-by  = "terraform"
-  repository  = "https://github.com/avlon/billing"
+  repository  = "https://github.com/avlon-technologies/billing"
 }
 ```
 

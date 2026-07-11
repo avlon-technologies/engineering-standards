@@ -1,7 +1,7 @@
 # Repository Structure
 
 **Status:** Active
-**Applies to:** Every repository in the `avlon` GitHub organization.
+**Applies to:** Every repository in the `avlon-technologies` GitHub organization.
 
 ---
 
@@ -88,9 +88,9 @@ never individuals**:
 
 ```text
 # .github/CODEOWNERS
-*           @avlon/billing-team
-/infra/     @avlon/platform-team
-/.github/   @avlon/platform-team
+*           @avlon-technologies/billing-team
+/infra/     @avlon-technologies/platform-team
+/.github/   @avlon-technologies/platform-team
 ```
 
 Teams are durable: membership changes without editing every CODEOWNERS file in the
@@ -137,9 +137,9 @@ depend on. Before archiving, update the README's first line to say what replaced
 A compliant new-workload checklist for `billing`:
 
 ```text
-[x] Repo avlon/billing created private, default branch main
+[x] Repo avlon-technologies/billing created private, default branch main
 [x] README.md: what/why/how-to-run written before first feature PR
-[x] .github/CODEOWNERS -> @avlon/billing-team, infra/ -> @avlon/platform-team
+[x] .github/CODEOWNERS -> @avlon-technologies/billing-team, infra/ -> @avlon-technologies/platform-team
 [x] Organization ruleset applies: PR + 1 approval + CI check + linear history
 [x] infra/ scaffolded per ../terraform/repository-layout.md
 [x] Labels provisioned by automation (see labels.md)

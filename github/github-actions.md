@@ -1,7 +1,7 @@
 # GitHub Actions
 
 **Status:** Active
-**Applies to:** All CI/CD workflows in the `avlon` organization.
+**Applies to:** All CI/CD workflows in the `avlon-technologies` organization.
 
 ---
 
@@ -63,7 +63,7 @@ environment secrets, not in org secrets.
 
 One deployment identity exists **per workload per environment** — for `billing` in
 production, `mi-github-billing-prod-cc-01` — with a federated credential scoped to the
-matching GitHub environment (`repo:avlon/billing:environment:prod`), so the `prod`
+matching GitHub environment (`repo:avlon-technologies/billing:environment:prod`), so the `prod`
 identity is only obtainable by a job that has passed the `prod` environment's approval
 gate. Identity setup and RBAC scoping are covered in
 [Identity](../azure/identity.md); the federated credential Terraform is in
@@ -142,7 +142,7 @@ new push arrives.
 
 ## Examples
 
-`ci.yml` for `avlon/billing`:
+`ci.yml` for `avlon-technologies/billing`:
 
 ```yaml
 name: CI
@@ -213,7 +213,7 @@ Calling a reusable workflow at a pinned ref:
 ```yaml
 jobs:
   plan:
-    uses: avlon/platform-workflows/.github/workflows/reusable-terraform-plan.yml@v2.3.0
+    uses: avlon-technologies/platform-workflows/.github/workflows/reusable-terraform-plan.yml@v2.3.0
     with:
       working-directory: infra/environments/stg
 ```

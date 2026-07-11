@@ -1,7 +1,7 @@
 # Code Reviews
 
 **Status:** Active
-**Applies to:** Every pull request in the `avlon` organization.
+**Applies to:** Every pull request in the `avlon-technologies` organization.
 
 ---
 
@@ -41,8 +41,8 @@ delivery while catching nothing). Review is a quality gate, not a power structur
 Every PR requires **at least one approval**; **platform and Terraform-module
 repositories require two** because their blast radius is every consumer
 (enforced by ruleset — see [Repository Structure](repository-structure.md)).
-`.github/CODEOWNERS` routes each review to the **owning team** — `@avlon/billing-team`,
-`@avlon/platform-team` — so requests never depend on one person's calendar and review
+`.github/CODEOWNERS` routes each review to the **owning team** — `@avlon-technologies/billing-team`,
+`@avlon-technologies/platform-team` — so requests never depend on one person's calendar and review
 load spreads across the team.
 
 ### What reviewers must check
@@ -73,7 +73,7 @@ decided in an ADR — reopen the ADR if you must, in its own PR.
 ### Response time
 
 **First response within one business day** — a review, a comment, or an honest "I can't
-get to this before Thursday, try @avlon/billing-team". Silence is the one prohibited
+get to this before Thursday, try @avlon-technologies/billing-team". Silence is the one prohibited
 response: the author cannot distinguish "busy" from "ignored", and open PRs rot against
 `main` ([Branching](branching.md)). Teams should batch review time into their day
 deliberately (start of day, after lunch) rather than treating requests as interrupts.

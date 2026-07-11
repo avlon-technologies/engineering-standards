@@ -1,7 +1,7 @@
 # Releases
 
 **Status:** Active
-**Applies to:** All repositories in the `avlon` organization that publish versions — applications and Terraform modules alike.
+**Applies to:** All repositories in the `avlon-technologies` organization that publish versions — applications and Terraform modules alike.
 
 ---
 
@@ -77,7 +77,7 @@ tag**, and consumers **MUST pin an exact tag**:
 
 ```hcl
 module "container_app" {
-  source = "git::https://github.com/avlon/terraform-azurerm-container-app.git?ref=v2.3.0"
+  source = "git::https://github.com/avlon-technologies/terraform-azurerm-container-app.git?ref=v2.3.0"
   # ...
 }
 ```
@@ -145,14 +145,14 @@ gh release create v3.0.0 --generate-notes
 The generated notes flag the breaking change; consumers upgrade deliberately:
 
 ```hcl
-# avlon/billing — infra/environments/prod/main.tf, upgraded in its own reviewed PR
+# avlon-technologies/billing — infra/environments/prod/main.tf, upgraded in its own reviewed PR
 module "container_app" {
-  source = "git::https://github.com/avlon/terraform-azurerm-container-app.git?ref=v3.0.0"
+  source = "git::https://github.com/avlon-technologies/terraform-azurerm-container-app.git?ref=v3.0.0"
   image  = "acrplatformsharedcc01.azurecr.io/billing-api:9f3ab12"   # was: container_image
 }
 ```
 
-Meanwhile `avlon/billing` itself deploys from `main` all week and tags `v1.8.0` when
+Meanwhile `avlon-technologies/billing` itself deploys from `main` all week and tags `v1.8.0` when
 the invoice-export feature reaches `prod`.
 
 ## Anti-patterns

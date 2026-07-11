@@ -40,7 +40,7 @@ SemVer tags and consumed with pinned refs (see [Modules](../terraform/modules.md
 
 ```hcl
 module "container_app" {
-  source = "git::https://github.com/avlon/terraform-azurerm-container-app.git?ref=v1.2.0"
+  source = "git::https://github.com/avlon-technologies/terraform-azurerm-container-app.git?ref=v1.2.0"
   # ...
 }
 ```
@@ -242,7 +242,7 @@ module "database" {
 }
 
 module "key_vault" {
-  source = "git::https://github.com/avlon/terraform-azurerm-key-vault.git?ref=v2.1.0"
+  source = "git::https://github.com/avlon-technologies/terraform-azurerm-key-vault.git?ref=v2.1.0"
 
   name                = "kv-${local.suffix}"          # kv-billing-prod-cc-01
   resource_group_name = azurerm_resource_group.main.name

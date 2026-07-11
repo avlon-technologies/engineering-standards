@@ -1,7 +1,7 @@
 # Labels
 
 **Status:** Active
-**Applies to:** Issues and pull requests in all repositories in the `avlon` organization.
+**Applies to:** Issues and pull requests in all repositories in the `avlon-technologies` organization.
 
 ---
 
@@ -93,16 +93,16 @@ Triage queries used in practice:
 
 ```text
 # Org-wide: exploitable or broken-in-prod work, oldest first
-org:avlon is:open label:priority/p1 sort:created-asc
+org:avlon-technologies is:open label:priority/p1 sort:created-asc
 
 # Weekly blocked review for the billing team
-org:avlon is:open label:status/blocked team-review-requested:avlon/billing-team
+org:avlon-technologies is:open label:status/blocked team-review-requested:avlon-technologies/billing-team
 
 # Sprint planning: candidate bugs in the API component
-repo:avlon/billing is:issue is:open label:type/bug label:area/billing-api -label:status/blocked
+repo:avlon-technologies/billing is:issue is:open label:type/bug label:area/billing-api -label:status/blocked
 
 # PRs waiting on reviewer attention
-org:avlon is:pr is:open label:status/needs-review sort:updated-asc
+org:avlon-technologies is:pr is:open label:status/needs-review sort:updated-asc
 ```
 
 A well-labeled issue: `type/bug` + `priority/p2` + `area/billing-api` — one type, one

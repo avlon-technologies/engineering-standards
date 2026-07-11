@@ -37,11 +37,11 @@ module "database" {
 }
 ```
 
-**Shared modules** live in dedicated repositories named `terraform-azurerm-<purpose>` (e.g. `terraform-azurerm-container-app`, `terraform-azurerm-sql-database`) in the `avlon` GitHub organization. They are released with **SemVer git tags** (`v1.2.0` — see [Releases](../github/releases.md)) and consumed only by pinned tag:
+**Shared modules** live in dedicated repositories named `terraform-azurerm-<purpose>` (e.g. `terraform-azurerm-container-app`, `terraform-azurerm-sql-database`) in the `avlon-technologies` GitHub organization. They are released with **SemVer git tags** (`v1.2.0` — see [Releases](../github/releases.md)) and consumed only by pinned tag:
 
 ```hcl
 module "container_app" {
-  source = "git::https://github.com/avlon/terraform-azurerm-container-app.git?ref=v1.2.0"
+  source = "git::https://github.com/avlon-technologies/terraform-azurerm-container-app.git?ref=v1.2.0"
   # ...
 }
 ```

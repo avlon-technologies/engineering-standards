@@ -1,7 +1,7 @@
 # Branching
 
 **Status:** Active
-**Applies to:** All repositories in the `avlon` organization.
+**Applies to:** All repositories in the `avlon-technologies` organization.
 
 ---
 

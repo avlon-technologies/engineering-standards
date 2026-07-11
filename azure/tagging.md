@@ -52,7 +52,7 @@ Required on **every resource group**, and applied to every resource via Terrafor
 | `owner` | Team alias, e.g. `platform-team`, `billing-team` — **never a person** | Incident routing at 2 a.m. People change teams, go on leave, and quit; teams answer pagers. A person's name in `owner` is a dead end waiting to happen. |
 | `cost-center` | Finance cost-center code | Chargeback and showback. This is the tag finance actually joins against; without it, cloud spend is one undifferentiated invoice line. |
 | `managed-by` | `terraform` \| `manual` | Drift detection and cleanup. Anything `manual` is a standing question ("why does this exist outside IaC?"); anything untagged is presumed abandoned. `manual` is for the short list of genuinely hand-managed exceptions, each of which should be an issue somewhere. |
-| `repository` | GitHub repo URL that manages the resource, e.g. `https://github.com/avlon/billing` | The road back to the code. From a portal resource to the Terraform that declares it in one click — during incidents, audits, and offboarding. This is also where the resource↔repo relationship lives, so repo refactors update a tag instead of moving resources (see [Resource Groups](resource-groups.md)). |
+| `repository` | GitHub repo URL that manages the resource, e.g. `https://github.com/avlon-technologies/billing` | The road back to the code. From a portal resource to the Terraform that declares it in one click — during incidents, audits, and offboarding. This is also where the resource↔repo relationship lives, so repo refactors update a tag instead of moving resources (see [Resource Groups](resource-groups.md)). |
 
 Optional where relevant:
 
@@ -77,7 +77,7 @@ locals {
     owner       = "billing-team"
     cost-center = var.cost_center          # "cc-2140"
     managed-by  = "terraform"
-    repository  = "https://github.com/avlon/billing"
+    repository  = "https://github.com/avlon-technologies/billing"
   }
 }
 
@@ -132,7 +132,7 @@ rg-billing-prod-cc-01
   owner               = billing-team
   cost-center         = cc-2140
   managed-by          = terraform
-  repository          = https://github.com/avlon/billing
+  repository          = https://github.com/avlon-technologies/billing
   data-classification = confidential
 ```
 

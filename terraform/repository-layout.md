@@ -90,7 +90,7 @@ A minimal `environments/dev/main.tf` for the `code-review` workload, showing the
 
 ```hcl
 module "container_app" {
-  source = "git::https://github.com/avlon/terraform-azurerm-container-app.git?ref=v1.2.0"
+  source = "git::https://github.com/avlon-technologies/terraform-azurerm-container-app.git?ref=v1.2.0"
 
   workload     = "code-review"
   environment  = "dev"

@@ -105,7 +105,7 @@ provider "azurerm" {
 }
 
 module "private_dns_records" {
-  source    = "git::https://github.com/avlon/terraform-azurerm-private-dns-records.git?ref=v2.0.1"
+  source    = "git::https://github.com/avlon-technologies/terraform-azurerm-private-dns-records.git?ref=v2.0.1"
   providers = { azurerm = azurerm.platform }
   # ...
 }

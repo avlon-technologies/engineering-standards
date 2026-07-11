@@ -113,7 +113,7 @@ resource names, repository names, state keys, and dashboards.
 - **The company name.** `avlon` adds no information inside Avlon's own tenant and organization,
   wastes scarce characters, and becomes wrong if a workload is transferred to a client. The one
   exception is namespaces that are globally shared by design, such as the GitHub organization
-  `avlon` itself.
+  `avlon-technologies` itself.
 - **Dates and versions.** Creation time lives in metadata; versions live in git tags and image
   tags. `billing-2026` and `billing-v2` both rot instantly and encourage clone-and-forget
   sprawl. If a rewrite truly needs to coexist with its predecessor, it is a different workload
@@ -134,7 +134,7 @@ The same workload name flowing through every system, unchanged:
 
 ```text
 billing                                  # the workload name, chosen once
-├── github.com/avlon/billing             # repository
+├── github.com/avlon-technologies/billing             # repository
 ├── rg-billing-prod-cc-01                # Azure resource group
 ├── stbillingprodcc01                    # storage account (hyphens stripped, name survives)
 ├── kv-billing-prod-cc-01                # Key Vault

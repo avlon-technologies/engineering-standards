@@ -44,11 +44,11 @@ resource "azurerm_federated_identity_credential" "github_prod" {
   parent_id           = azurerm_user_assigned_identity.github_billing_prod.id
   audience            = ["api://AzureADTokenExchange"]
   issuer              = "https://token.actions.githubusercontent.com"
-  subject             = "repo:avlon/billing:environment:prod"
+  subject             = "repo:avlon-technologies/billing:environment:prod"
 }
 ```
 
-The subject claim is the security boundary: only a job in `avlon/billing` running against the `prod` GitHub environment — which means it passed that environment's protection rules and required reviewers ([GitHub Actions](../github/github-actions.md)) — can become `mi-github-billing-prod-cc-01`. A fork, another repo, or a dev job gets nothing. Per-workload-per-environment identities keep the failure mode bounded: compromising the billing dev pipeline yields exactly billing-dev privileges.
+The subject claim is the security boundary: only a job in `avlon-technologies/billing` running against the `prod` GitHub environment — which means it passed that environment's protection rules and required reviewers ([GitHub Actions](../github/github-actions.md)) — can become `mi-github-billing-prod-cc-01`. A fork, another repo, or a dev job gets nothing. Per-workload-per-environment identities keep the failure mode bounded: compromising the billing dev pipeline yields exactly billing-dev privileges.
 
 ### Least-privilege RBAC for deployment identities
 
@@ -129,7 +129,7 @@ Two assignments, two narrow scopes — the identity's entire world.
 |--------------|----------------|
 | A service principal with a client secret in GitHub secrets | A long-lived credential that can be exfiltrated and used from anywhere. OIDC federation makes it unnecessary — see [GitHub Actions](../github/github-actions.md). |
 | One `sp-terraform` identity with subscription Owner for all deploys | Every pipeline compromise is now a subscription compromise, and no audit trail distinguishes workloads. One identity per workload per environment. |
-| Subject claim `repo:avlon/billing:ref:refs/heads/main` for prod | Binds to a branch, not to the gated `prod` environment — any push to main mints prod credentials without protection rules. Bind to `environment:prod`. |
+| Subject claim `repo:avlon-technologies/billing:ref:refs/heads/main` for prod | Binds to a branch, not to the gated `prod` environment — any push to main mints prod credentials without protection rules. Bind to `environment:prod`. |
 | `sql_admin_password = "P@ssw0rd1"` in tfvars | A secret in git, in state, and in every clone. Key Vault, always. |
 | Committing state, or granting broad read on state containers "for debugging" | State is plaintext secrets; both actions are secret disclosure. |
 | Skipping `prevent_destroy` because "the plan gets reviewed" | Review is a probabilistic control; forced replacement diffs are easy to misread. Stateful resources get a deterministic guard. |

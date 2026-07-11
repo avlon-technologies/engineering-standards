@@ -1,7 +1,7 @@
 # Pull Requests
 
 **Status:** Active
-**Applies to:** Every change to every repository in the `avlon` organization.
+**Applies to:** Every change to every repository in the `avlon-technologies` organization.
 
 ---
 
@@ -129,7 +129,7 @@ change is genuinely trivial, it will be trivially fast to review.
 
 ## Examples
 
-A well-formed PR for `avlon/billing`:
+A well-formed PR for `avlon-technologies/billing`:
 
 ```text
 Title:  feat: add invoice CSV export
@@ -148,7 +148,7 @@ Body:
   ## Breaking changes
   None.
 
-Checks: CI ✓            Reviews: @avlon/billing-team ✓
+Checks: CI ✓            Reviews: @avlon-technologies/billing-team ✓
 Merge:  squash → "feat: add invoice CSV export (#157)" on main
 ```
 
