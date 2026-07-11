@@ -1,8 +1,8 @@
 # Avlon Technologies — Engineering Standards
 
-This repository is the **single source of truth** for engineering practices at Avlon Technologies. It defines how we design, build, name, secure, and operate software and cloud infrastructure across every client engagement and internal project.
+The Avlon Engineering Standards define the recommended engineering practices for building secure, maintainable, and scalable software systems. They exist to promote consistency across projects while allowing teams to make informed architectural decisions when trade-offs are required. These standards are living documentation and evolve alongside our engineering practices.
 
-It is written as an engineering handbook, not a collection of notes: every standard explains *why* it exists, shows concrete examples, names its anti-patterns, and is honest about its tradeoffs.
+This repository is the single source of truth for those practices: how we design, build, name, secure, and operate software and cloud infrastructure across every client engagement and internal project. It is written as an engineering handbook, not a collection of notes — every standard explains *why* it exists, shows concrete examples, names its anti-patterns, and is honest about its tradeoffs. These are opinionated guidelines grounded in engineering principles, not arbitrary rules.
 
 ## Purpose
 
@@ -70,8 +70,8 @@ This first phase covers the foundations every project touches on day one:
 
 ## How to Use This Repository
 
-- **Standards are mandatory by default.** Deviations require a documented, justified reason (typically an ADR in the project repository).
-- **Standards are living documents.** They evolve as platforms, tooling, and our experience evolve. Propose changes via pull request; discussion happens in review.
+- **Standards are the default, not a straitjacket.** Follow them unless there is a real reason not to. When a project's requirements genuinely conflict with a standard, make the informed trade-off — and document it (typically an ADR in the project repository) so the reasoning survives the decision.
+- **Standards are living documents.** They evolve as platforms, tooling, and our experience evolve. Propose changes via pull request; discussion happens in review. If you deviate for the same reason twice, the standard is probably wrong — propose the change.
 - **When a standard is silent, use judgment** — then propose an addition so the next engineer doesn't have to.
 
 ## Contributing
