@@ -52,7 +52,7 @@ Example: `ca-code-review-dev-cc`
 | Segment | Description | Examples |
 |---------|-------------|----------|
 | `resource-type` | CAF abbreviation for the Azure resource type (table below). Always first, so resources group by type when sorted. | `rg`, `kv`, `ca` |
-| `workload` | Short, stable workload name — lowercase kebab-case, ≤ 12 characters. May include a component suffix for multi-component workloads (`billing-api`, `billing-web`). | `code-review`, `billing` |
+| `workload` | Short, stable workload name — lowercase kebab-case, ≤ 12 characters. For deployables with a component role, **includes the component suffix from creation** (`billing-api`, `billing-web`) — see [The component suffix](#the-component-suffix). | `code-review`, `billing-api` |
 | `environment` | One of `dev`, `stg`, `prod`, `shared` — see [Azure Environments](../azure/environments.md). `shared` is reserved for platform resources serving all environments. | `dev`, `prod` |
 | `region` | Short region code (table below). | `cc`, `ce` |
 | `instance` | **Optional.** Two-digit, zero-padded ordinal, appended only when it disambiguates something real — see [The instance segment](#the-instance-segment). | `02`, `03` |
@@ -83,6 +83,36 @@ information — so **the default is no instance segment at all**: `rg-billing-pr
 
 In Terraform, the `instance` input therefore defaults to *empty/null* and is set per resource
 only when one of the cases above applies.
+
+### The component suffix
+
+Deployable compute resources that carry a component role — an API, a web frontend, a worker —
+**include that role in the workload segment from the day they are created**: `app-billing-api-prod-cc`,
+even while the API is the workload's only deployable. Use the conventional short roles
+`api`, `web`, `worker` (extend sparingly).
+
+This is deliberately the opposite default from the instance segment, and the difference is the
+cost of being wrong. A missing `-01` is added the day a second instance appears, painlessly —
+the newcomer takes the ordinal. A missing component suffix cannot be added later without
+**destroying and recreating the resource**: deployable names are global DNS identity
+(`*.azurewebsites.net`), so the rename cascades into custom-domain re-validation, pipeline
+variables, and gateway backend configuration. The suffix is not a dead segment (Principle 6);
+it is identity paid for upfront because retrofitting it is the single most expensive naming
+mistake on the estate.
+
+Boundaries of the rule:
+
+- It applies to **deployables** (App Service, Container Apps, Function Apps, Static Web Apps
+  and their slots). Surrounding singletons — the resource group, plan, Key Vault, VNet — stay
+  unsuffixed; they serve the whole workload and renaming them is cheap or unnecessary.
+- The test is whether you would call the deployable "the API" / "the frontend" / "the worker".
+  If yes, the name says so — explicitly, even for the workload's only deployable. A deployable
+  with no such role (the workload *is* one service — a bot, a scheduled job) keeps the bare
+  workload name.
+- Budget for it: with a suffix in play, keep the **base workload name ≤ 8 characters** so
+  `<base>-api` fits the 12-character workload budget (`cicd-api`, not `cicd-demo-api`).
+- Existing unsuffixed deployables are not renamed retroactively — the rule exists precisely
+  because that rework is not worth it. They adopt the suffix if and when they are rebuilt.
 
 ### Resource type prefixes
 
@@ -162,9 +192,11 @@ same components in the same order — but the format adapts.
 **Length budgeting.** The tightest common constraints are the storage account and Key Vault at
 24 characters. `st<workload><env><region>` must fit in 24 — 2 for the prefix, up to 6 for the
 environment (`shared`), up to 4 for the region — which is why **workload names are 12
-characters or fewer** (hyphens included). Leave one character of slack where you can: a
-collision ordinal (below) costs two more. If a name still won't fit, shorten the workload name
-consistently everywhere — never truncate ad hoc in one place.
+characters or fewer** (hyphens included). Component suffixes live inside that budget, which is
+why base workload names stay ≤ 8 characters when the workload has (or will plausibly have)
+suffixed deployables — see [The component suffix](#the-component-suffix). Leave one character
+of slack where you can: a collision ordinal (below) costs two more. If a name still won't fit,
+shorten the workload name consistently everywhere — never truncate ad hoc in one place.
 
 **Global uniqueness collisions.** When a globally unique name is taken by another tenant (rare,
 given the workload+env+region combination), append the lowest free instance ordinal starting at
@@ -273,7 +305,7 @@ naming module so the region map and pattern are defined once per organization.
 ```text
 rg-code-review-dev-cc           # Resource group
 cae-code-review-dev-cc          # Container Apps environment
-ca-code-review-dev-cc           # Container App
+ca-code-review-dev-cc           # Container App (one role-less service; an API would be ca-<base>-api-… — see The component suffix)
 kv-code-review-dev-cc           # Key Vault
 sqldb-code-review-dev-cc        # SQL database
 appi-code-review-dev-cc         # Application Insights
@@ -340,6 +372,7 @@ stbillingprodcc01               # global name collision: stbillingprodcc was tak
 | `st-billing-prod` | Hyphens are illegal in storage accounts, and the missing segments make the name unpredictable. |
 | `rg-billing-prod-cc-01` for a singleton | A dead segment: `-01` on a resource with no siblings says nothing and costs three characters on every name in the estate. Instance ordinals are appended only when they disambiguate — see [The instance segment](#the-instance-segment). |
 | `kv-billing-prod-cc-dr` | Meaning smuggled into the instance slot. DR is expressed by the region code: `kv-billing-prod-ce`. |
+| `app-billing-prod-cc` for an API | Missing component suffix on a deployable. Unlike an instance ordinal, the suffix cannot be added later without destroying and recreating the resource (the name is DNS identity) — include `-api`/`-web` from creation. See [The component suffix](#the-component-suffix). |
 | `sql-mike-test`, `vm-billing-20260711` | Personal names and dates — see [General Naming Principles](general.md). |
 | Hardcoded name strings in Terraform | Drift between environments; the convention disappears from review. Generate from locals. |
 
@@ -356,6 +389,13 @@ stbillingprodcc01               # global name collision: stbillingprodcc was tak
   nothing. Where multiples are *planned*, numbering everything from `01` up front restores
   symmetry — anticipating that is the engineer's judgment call, and misjudging it costs an
   asymmetric name, not an outage.
+- **The component suffix is paid on every deployable, including ones that never grow a
+  sibling.** `app-billing-api-prod-cc` carries `-api` even if no `-web` ever ships. We accept
+  the four characters because the alternative — retrofitting the suffix onto a live deployable —
+  means destroy/recreate and a cascade through DNS, certificates, and pipelines. This is the
+  same rename-cost asymmetry as the instance tradeoff above, resolved in the opposite
+  direction because the odds differ: a second instance of the same component is rare, a second
+  component in a workload is routine.
 - **A fixed prefix and region table needs maintenance.** New resource types and regions require
   a pull request before first use. That gate is the feature — it is how two teams avoid
   inventing two abbreviations for the same thing.
