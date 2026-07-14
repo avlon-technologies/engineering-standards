@@ -28,8 +28,11 @@ change.
 3. **Releases are generated, not written.** Notes and changelogs derived mechanically
    from merged PR titles are always complete and always current; hand-written ones are
    neither.
-4. **Deployment and release are different events for apps.** Apps deploy continuously
-   from `main`; a tag marks what was released, it does not cause the deploy.
+4. **Deployment and release relate differently in each track.** GitHub Flow repositories
+   deploy continuously from `main`, and a tag marks what was released after the fact.
+   GitFlow repositories make releasing a deliberate act — a `release/*` branch stabilizes
+   a version, and the tag on `main` *is* the release that promotes to `prod` (see
+   [Branching](branching.md)).
 5. **Modules without pinned versions are a shared mutable variable.** Terraform module
    consumers must be able to upgrade deliberately, one caller at a time.
 
@@ -62,13 +65,27 @@ Module majors matter more than app majors because the failure is silent until ap
 a consumer bumping `terraform-azurerm-container-app` across an unmarked breaking change
 gets a broken plan — or worse, a plan that quietly destroys production resources.
 
-### Applications: deploy from main, tag what shipped
+### Continuously deployed repos (GitHub Flow): deploy from main, tag what shipped
 
-Apps deploy continuously from `main` via the pipeline
-([GitHub Actions](github-actions.md)) — deployment needs no tag. Tags are the
-**record**: when a `main` commit is promoted to `prod`, it is tagged and a GitHub
-Release is published, so "what is running in prod" and "what changed since last
-release" are answerable from the repository alone.
+Repositories that deploy continuously from `main` via the pipeline
+([GitHub Actions](github-actions.md)) need no tag to deploy. Tags are the **record**:
+when a `main` commit is promoted to `prod`, it is tagged and a GitHub Release is
+published, so "what is running in prod" and "what changed since last release" are
+answerable from the repository alone. (Most web front-ends live here — but so does any
+service that ships continuously with no pinned consumers; the track follows cadence and
+pinning, not layer — see [Branching](branching.md).)
+
+### Staged/version-pinned repos (GitFlow): release by branch, tag on main
+
+Repositories with a deliberate release cadence or version-pinned consumers release
+deliberately. A `release/<version>` branch is cut from `develop`, validated in `stg`,
+and — when it merges to `main` — tagged with that version and promoted to `prod`. Here
+the tag is not an after-the-fact record but the release event itself: the merge-and-tag
+on `main` is what ships the version, and the [SemVer](https://semver.org/) bump is
+decided when the release branch is named. A `hotfix/<version>` follows the same rule on a
+shorter path — cut from `main`, tagged on merge back to `main`. Every tag on such a
+repo's `main` corresponds to exactly one `release/*` or `hotfix/*` merge; there are no
+untagged production deploys.
 
 ### Terraform modules: release by tag, consume by tag
 
@@ -152,8 +169,10 @@ module "container_app" {
 }
 ```
 
-Meanwhile `avlon-technologies/billing` itself deploys from `main` all week and tags `v1.8.0` when
-the invoice-export feature reaches `prod`.
+Meanwhile the `avlon-technologies/billing-web` front-end deploys from `main` all week
+(GitHub Flow) and tags `v1.8.0` when the export UI reaches `prod`. Its `billing-api`
+counterpart, on GitFlow, instead cuts `release/1.8.0` from `develop`, stabilizes it in
+`stg`, and tags `v1.8.0` on the merge to `main`.
 
 ## Anti-patterns
 
@@ -164,7 +183,7 @@ the invoice-export feature reaches `prod`.
 | Hand-written CHANGELOG | Complete on day one, fiction by month three |
 | Vague PR titles (`updates`) | Directly become garbage release notes — the cost lands here |
 | Breaking module change shipped as minor | Consumers upgrade "safely" into a destructive plan |
-| Tagging apps to trigger deployment | Couples release bookkeeping to deploy mechanics; the pipeline deploys `main`, tags record it |
+| Tagging a **continuously deployed** repo to trigger deployment | GitHub Flow repos deploy from `main`; the tag records what shipped, it does not cause the deploy. (On GitFlow repos the release tag on `main` deliberately *is* the prod release — see [Branching](branching.md).) |
 | `v1.4-final-2` style ad-hoc versions | Unparseable by tooling; unorderable by humans |
 
 ## Tradeoffs
@@ -184,5 +203,5 @@ the invoice-export feature reaches `prod`.
 - [Pull Requests](pull-requests.md) — the Conventional Commit titles release notes are built from
 - [Terraform Modules](../terraform/modules.md) — module contract and versioning details
 - [GitHub Actions](github-actions.md) — the pipeline that deploys `main` and promotes environments
-- [Branching](branching.md) — why `main` is always in a releasable state
+- [Branching](branching.md) — how `release/*` branches (GitFlow) and continuous `main` (GitHub Flow) produce releases
 - [GitHub Naming](../naming/github.md) — repository and tag naming

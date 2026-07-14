@@ -58,14 +58,19 @@ recognizable as reusable infrastructure — see [Terraform Naming](terraform.md)
 
 ### Branches
 
-Trunk-based development off `main` (see [Branching](../github/branching.md)). Short-lived
-branches follow:
+The base branch depends on the repository's track (see
+[Branching](../github/branching.md)): GitFlow repositories cut features from `develop`,
+GitHub Flow repositories cut them from `main`. **Long-lived branch names are fixed** —
+`main` in every repository, plus `develop` in GitFlow repositories; no variants
+(`master`, `trunk`, `dev`) exist.
+
+Short-lived **work branches** follow:
 
 ```text
 <type>/<issue>-<slug>
 ```
 
-where `<type>` is one of `feature`, `fix`, `chore`, `docs`, `hotfix`; `<issue>` is the issue or
+where `<type>` is one of `feature`, `fix`, `chore`, `docs`; `<issue>` is the issue or
 ticket number; and `<slug>` is a short kebab-case description.
 
 ```text
@@ -73,12 +78,19 @@ feature/142-invoice-export
 fix/198-null-invoice-total
 chore/205-bump-azurerm-provider
 docs/211-naming-standard-links
-hotfix/220-payment-retry-loop
+```
+
+Short-lived **release and hotfix branches** (GitFlow repositories only) are named for the
+SemVer version they carry, not an issue — the version *is* the context:
+
+```text
+release/1.4.0
+hotfix/1.4.1
 ```
 
 The type prefix makes branch listings scannable and lets automation apply labels; the issue
-number links the branch to its context; the slug is for humans. Branches are deleted on merge —
-never park long-lived work on a branch name.
+number (or version) links the branch to its context; the slug is for humans. Every branch
+except `main` and `develop` is deleted on merge — never park long-lived work on a branch name.
 
 ### Workflow files
 
@@ -199,6 +211,6 @@ Four systems, one string.
 
 - [General Naming Principles](general.md) — workload names and environment codes
 - [Repository Structure](../github/repository-structure.md) — what goes inside the repo
-- [Branching](../github/branching.md) — trunk-based flow the branch names serve
+- [Branching](../github/branching.md) — the GitFlow and GitHub Flow tracks the branch names serve
 - [GitHub Actions](../github/github-actions.md) — workflows, OIDC, environment protection
 - [Labels](../github/labels.md) — full label set and colors

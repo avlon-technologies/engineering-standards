@@ -28,9 +28,11 @@ deploys corrupt Terraform state; and every repository invents its own pipeline s
    it needs. The default token grants far more than almost any job requires.
 3. **Immutable dependencies.** Third-party code runs only at a reviewed, pinned commit
    SHA. Tags are marketing; SHAs are facts.
-4. **Same pipeline, promoted artifact.** One build from `main` moves through
-   `dev` → `stg` → `prod`. Environments differ in configuration and approval gates,
-   never in build.
+4. **Same pipeline, promoted artifact.** One build moves through
+   `dev` → `stg` → `prod` — from `main` in GitHub Flow, or from the `release/*` branch it
+   was cut on in GitFlow. Environments differ in configuration and approval gates, never
+   in build; the artifact validated in `stg` is byte-for-byte the one that runs in
+   `prod`.
 5. **Shared logic is versioned code.** Pipeline logic used by many repos lives in
    reusable workflows, reviewed and pinned like any other dependency.
 
@@ -44,11 +46,19 @@ Every repository has exactly these entry points (names canonical in
 - **`ci.yml`** (`name: CI`) — build, test, lint on every pull request and every push to
   `main`. Its jobs are the required status checks that gate merge
   ([Repository Structure](repository-structure.md)).
-- **`deploy.yml`** (`name: Deploy`) — deploys on push to `main`, promoting through the
-  GitHub **environments** `dev`, `stg`, `prod` (the environment definitions live in
-  [Azure Environments](../azure/environments.md)). Environment protection rules
-  gate promotion: **required reviewers on `prod`** (the owning team), optionally on
-  `stg`; `dev` deploys unattended.
+- **`deploy.yml`** (`name: Deploy`) — deploys to the GitHub **environments** `dev`,
+  `stg`, `prod` (the environment definitions live in
+  [Azure Environments](../azure/environments.md)). Environment protection rules gate
+  promotion: **required reviewers on `prod`** (the owning team), optionally on `stg`;
+  `dev` deploys unattended. **What triggers each environment depends on the repository's
+  branching track** (see [Branching](branching.md)):
+  - **GitHub Flow repositories** deploy on push to `main`, promoting one artifact through
+    `dev` → `stg` → `prod`. Environments are pipeline stages; the same build moves
+    between them.
+  - **GitFlow repositories** map environments to branches: a push to `develop` deploys
+    `dev`, a push to a `release/*` branch deploys `stg`, and a merge to `main` (a tagged
+    release) deploys `prod`. The artifact built from a `release/*` branch is the one
+    promoted to `prod` on release — it is not rebuilt.
 - **`reusable-<purpose>.yml`** — reusable workflows (`on: workflow_call`) for logic
   shared across repositories, e.g. `reusable-terraform-plan.yml`. These live in a
   platform-owned repo and are called with **pinned refs**, never `@main`.
@@ -225,7 +235,7 @@ jobs:
 | `AZURE_CLIENT_SECRET` in repo secrets | Long-lived credential that leaks, expires mid-deploy, and defeats WIF entirely |
 | `uses: someone/action@v3` (third party) | Tag can be repointed at malicious code that runs with your token and identity |
 | No `permissions:` block | Token defaults are far broader than any job needs; a compromised step inherits it all |
-| Deploying from environment branches | See [Branching](branching.md) — environments are pipeline stages, not branches |
+| Deploying from permanent `staging`/`production` branches | Long-lived environment branches drift from `main`; use pipeline promotion (GitHub Flow) or GitFlow's short-lived, back-merged `release/*` branches — see [Branching](branching.md) |
 | Rebuilding the image per environment | stg validated a different artifact than prod runs; promote one image by tag through `acrplatformsharedcc` (see [Container Registry](../azure/container-registry.md)) |
 | No concurrency group on deploys | Two merges apply Terraform against the same state concurrently |
 | Repo-wide secrets used by deploy jobs | Any workflow in the repo can read them, bypassing environment protection |
