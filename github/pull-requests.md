@@ -8,8 +8,11 @@
 ## Purpose
 
 The pull request is Avlon's **unit of change**: the unit of review, of CI verification,
-of merge, of revert, and — because we squash merge — of history. Everything that reaches
-`main` arrives as exactly one PR that becomes exactly one commit.
+of merge, and of revert. **Feature work** — the day-to-day change, in both branching
+tracks — arrives as exactly one PR that squash-merges into its base branch (`main` in
+GitHub Flow, `develop` in GitFlow) as exactly one commit. GitFlow's `release/*` and
+`hotfix/*` PRs are the deliberate exception: they merge to `main` as `--no-ff` merge
+commits so the release topology is preserved (see [Branching](branching.md)).
 
 This standard exists because PR quality determines review quality. A 2,000-line PR with
 the title "updates" cannot be meaningfully reviewed, cannot be cleanly reverted, and
@@ -23,8 +26,8 @@ describing, and mechanically consistent — which is what makes the rest of the 
    few hundred lines, reviewers stop reasoning about the change and start skimming it.
    Ten small PRs get ten real reviews; one huge PR gets one rubber stamp.
 2. **The PR title is permanent; the branch is not.** Squash merge makes the title the
-   commit subject on `main` forever. Titles are written for `git log`, not for the
-   author's convenience.
+   commit subject on the base branch forever. Titles are written for `git log`, not for
+   the author's convenience.
 3. **Machines before humans.** CI must be green before a human is asked to look.
    Reviewer attention is the most expensive resource in the process; never spend it on
    a build that a robot already knows is broken.
@@ -72,17 +75,28 @@ erases them.
 Use `!` for breaking changes (`feat!: require api key on export endpoint`) — release
 tooling uses it to compute the [SemVer](releases.md) bump.
 
-### Merge strategy: squash only
+### Merge strategy: squash for features, merge commits for GitFlow releases
 
-Repositories allow **squash merge and nothing else** (merge commits and rebase merge
-disabled). Squash merge gives us:
+**Feature PRs squash-merge** in both tracks — into `main` (GitHub Flow) or `develop`
+(GitFlow). Squash merge gives us:
 
-- **Linear history** — `git log main` is a clean sequence of reviewed changes, one line
-  per PR, bisectable without navigating merge topology.
+- **Readable history** — one line per feature on the base branch, bisectable without
+  navigating merge topology.
 - **Clean revert units** — reverting a feature is `git revert <one commit>`, not
   untangling which of nineteen commits belonged to it.
-- **Invisible WIP** — branch-local noise commits never pollute `main`, so authors can
-  commit freely while working instead of curating history as they go.
+- **Invisible WIP** — branch-local noise commits never pollute the base branch, so
+  authors can commit freely while working instead of curating history as they go.
+
+**GitFlow `release/*` and `hotfix/*` PRs merge with `--no-ff` merge commits**, not
+squash. Here the merge topology is the point: the merge commit ties the release (or
+hotfix) to `main` as a discoverable release point and reconciles it back into `develop`.
+Squashing a release would sever that tie and lose the back-merge relationship.
+
+The allowed merge strategies are therefore set per track (see
+[Repository Structure](repository-structure.md)): **GitHub Flow repositories enable
+squash merge only** (merge and rebase merge disabled, linear history enforced);
+**GitFlow repositories enable squash merge for features and merge commits for
+release/hotfix PRs** (linear history not enforced). Rebase merge is disabled in both.
 
 ### Description
 
@@ -159,7 +173,7 @@ Merge:  squash → "feat: add invoice CSV export (#157)" on main
 | 1,500-line PR mixing refactor and feature | Unreviewable; unrevertable as a unit; guarantees a rubber stamp |
 | Title `updates` or `fix stuff` | Becomes a permanent, meaningless line in `git log` and the release notes |
 | Requesting review with failing checks | Burns reviewer time on what a robot already caught |
-| Merge commits or rebase-merge enabled | Breaks linear history and the one-PR-one-commit revert model |
+| Rebase-merge enabled, or merge commits on a GitHub Flow repo | Rebase-merge is disabled everywhere; merge commits on a GitHub Flow repo break its linear-history, one-PR-one-commit revert model (they are only for GitFlow `release`/`hotfix`) |
 | Description = the diff restated | Says *what* twice and *why* never; the diff already shows what |
 | Self-merging with admin rights | One unreviewed change is how the "always reviewed" invariant dies |
 | PR left open for weeks | Goes stale against `main`; see [Branching](branching.md) on branch lifetime |

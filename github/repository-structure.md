@@ -77,9 +77,17 @@ kebab-case, `billing`, `billing-api`, `terraform-azurerm-container-app`.
 
 ### Default branch
 
-The default branch is `main`, always. No repository uses `master`, `trunk`, `develop`,
-or anything else. Automation across the organization (deploy triggers, release tooling,
-ruleset templates) assumes `main`; a divergent default branch silently breaks all of it.
+The default branch is `main`, always. No repository uses `master`, `trunk`, or anything
+else as its default. Automation across the organization (deploy triggers, release
+tooling, ruleset templates) assumes `main`; a divergent default branch silently breaks
+all of it.
+
+GitFlow repositories (those with staged releases or version-pinned consumers — see
+[Branching](branching.md)) have a **second long-lived branch, `develop`**, as their
+integration branch. `develop` is not the default and is never a substitute for `main`; it
+is an additional protected branch that exists only in the GitFlow track. GitHub Flow
+repositories (continuously deployed, nothing pinned) have `main` as their only long-lived
+branch.
 
 ### CODEOWNERS
 
@@ -109,9 +117,17 @@ protection — rulesets are centrally managed and auditable) that enforces:
 | Approvals required | 1 minimum; **2 for platform and Terraform-module repositories** |
 | CODEOWNERS review required | Yes |
 | Required status checks | `CI` must pass (see [GitHub Actions](github-actions.md)) |
-| Linear history | Required (pairs with squash-merge-only) |
+| Linear history | Required **for GitHub Flow repositories** (pairs with squash-merge-only); **not required for GitFlow repositories**, whose `release`/`hotfix` merge commits are the record |
 | Force pushes | Blocked |
 | Branch deletion | Blocked for `main` |
+
+In **GitFlow repositories**, the same ruleset also protects **`develop`** — PR required,
+CI green, CODEOWNERS review — because `develop` is a long-lived integration branch that
+features merge into directly. Linear history is not enforced on either `main` or
+`develop` in GitFlow repos: the `--no-ff` merge commits that tie `release`/`hotfix`
+branches to `main` and back to `develop` are deliberate history, not clutter (see
+[Branching](branching.md)). GitHub Flow repositories protect only `main` and keep linear
+history on, since every merge there is a squash.
 
 Platform and Terraform-module repositories require two approvals because their blast
 radius is every consumer: a bad merge to `terraform-azurerm-container-app` breaks every
@@ -134,16 +150,21 @@ depend on. Before archiving, update the README's first line to say what replaced
 
 ## Examples
 
-A compliant new-workload checklist for `billing`:
+A compliant new-workload checklist for the `billing-web` front-end (GitHub Flow):
 
 ```text
-[x] Repo avlon-technologies/billing created private, default branch main
+[x] Repo avlon-technologies/billing-web created private, default branch main
 [x] README.md: what/why/how-to-run written before first feature PR
 [x] .github/CODEOWNERS -> @avlon-technologies/billing-team, infra/ -> @avlon-technologies/platform-team
+[x] Track chosen: GitHub Flow (front-end) — main only, squash-merge, linear history
 [x] Organization ruleset applies: PR + 1 approval + CI check + linear history
 [x] infra/ scaffolded per ../terraform/repository-layout.md
 [x] Labels provisioned by automation (see labels.md)
 ```
+
+A `billing-api` service would instead check *Track chosen: GitFlow* — adding a protected
+`develop` branch, merge commits for `release`/`hotfix`, and linear history **off** (see
+[Branching](branching.md)).
 
 ## Anti-patterns
 

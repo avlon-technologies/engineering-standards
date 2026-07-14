@@ -75,7 +75,8 @@ decided in an ADR — reopen the ADR if you must, in its own PR.
 **First response within one business day** — a review, a comment, or an honest "I can't
 get to this before Thursday, try @avlon-technologies/billing-team". Silence is the one prohibited
 response: the author cannot distinguish "busy" from "ignored", and open PRs rot against
-`main` ([Branching](branching.md)). Teams should batch review time into their day
+their base branch — `main` or `develop` ([Branching](branching.md)). Teams should batch
+review time into their day
 deliberately (start of day, after lunch) rather than treating requests as interrupts.
 
 ### How to give feedback
